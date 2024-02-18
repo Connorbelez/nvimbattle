@@ -3,7 +3,7 @@
 -- local socketCorePath = "./deps/luasocket/src/socket-3.1.0.so"
 -- vim.opt.runtimepath:prepend(socketCorePath)
 -- package.cpath = socketCorePath .. "/?.so;" .. package.cpath
-local socket = require("deps.lsock.socket")
+local socket = require("vbattle.deps.sock.socket")
 -- Server details
 local host = "192.168.3.19"
 local port = 80 -- Adjusted to match the Go server port
