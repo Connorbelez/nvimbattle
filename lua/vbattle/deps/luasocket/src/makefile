@@ -18,7 +18,7 @@ PLAT?=linux
 
 # LUAV: 5.1 5.2 5.3 5.4
 # lua version to build against
-LUAV?=5.1
+LUAV=5.1
 
 # MYCFLAGS: to be set by user if needed
 MYCFLAGS?=
@@ -39,16 +39,16 @@ LUAINC_macosx?=$(LUAINC_macosx_base)/lua/$(LUAV) $(LUAINC_macosx_base)/lua$(LUAV
 
 # FIXME default should this default to fink or to macports?
 # What happens when more than one Lua version is installed?
-LUAPREFIX_macosx?=/opt/local
-CDIR_macosx?=lib/lua/$(LUAV)
-LDIR_macosx?=share/lua/$(LUAV)
+# LUAPREFIX_macosx?=/opt/local
+# CDIR_macosx?=lib/lua/$(LUAV)
+# LDIR_macosx?=share/lua/$(LUAV)
 
 # LUAINC_linux:
 # /usr/include/lua$(LUAV)
 # /usr/local/include
 # /usr/local/include/lua$(LUAV)
 # where lua headers are found for linux builds
-LUAINC_linux_base?=/usr/include
+LUAINC_linux_base?=/home/cbizy/.local/share/nvim/lazy/nvim_rocks
 LUAINC_linux?=$(LUAINC_linux_base)/lua/$(LUAV) $(LUAINC_linux_base)/lua$(LUAV)
 LUAPREFIX_linux?=/usr/local
 CDIR_linux?=lib/lua/$(LUAV)
@@ -57,34 +57,34 @@ LDIR_linux?=share/lua/$(LUAV)
 # LUAINC_freebsd:
 # /usr/local/include/lua$(LUAV)
 # where lua headers are found for freebsd builds
-LUAINC_freebsd_base?=/usr/local/include/
-LUAINC_freebsd?=$(LUAINC_freebsd_base)/lua/$(LUAV) $(LUAINC_freebsd_base)/lua$(LUAV)
-LUAPREFIX_freebsd?=/usr/local/
-CDIR_freebsd?=lib/lua/$(LUAV)
-LDIR_freebsd?=share/lua/$(LUAV)
+# LUAINC_freebsd_base?=/usr/local/include/
+# LUAINC_freebsd?=$(LUAINC_freebsd_base)/lua/$(LUAV) $(LUAINC_freebsd_base)/lua$(LUAV)
+# LUAPREFIX_freebsd?=/usr/local/
+# CDIR_freebsd?=lib/lua/$(LUAV)
+# LDIR_freebsd?=share/lua/$(LUAV)
 
 # where lua headers are found for mingw builds
 # LUAINC_mingw:
 # /opt/local/include
-LUAINC_mingw_base?=/usr/include
-LUAINC_mingw?=$(LUAINC_mingw_base)/lua/$(LUAV) $(LUAINC_mingw_base)/lua$(LUAV)
-LUALIB_mingw_base?=/usr/bin
-LUALIB_mingw?=$(LUALIB_mingw_base)/lua/$(LUAV)/lua$(subst .,,$(LUAV)).dll
-LUAPREFIX_mingw?=/usr
-CDIR_mingw?=lua/$(LUAV)
-LDIR_mingw?=lua/$(LUAV)/lua
+# LUAINC_mingw_base?=/usr/include
+# LUAINC_mingw?=$(LUAINC_mingw_base)/lua/$(LUAV) $(LUAINC_mingw_base)/lua$(LUAV)
+# LUALIB_mingw_base?=/usr/bin
+# LUALIB_mingw?=$(LUALIB_mingw_base)/lua/$(LUAV)/lua$(subst .,,$(LUAV)).dll
+# LUAPREFIX_mingw?=/usr
+# CDIR_mingw?=lua/$(LUAV)
+# LDIR_mingw?=lua/$(LUAV)/lua
 
 
 # LUAINC_win32:
 # LUALIB_win32:
 # where lua headers and libraries are found for win32 builds
-LUAPREFIX_win32?=
-LUAINC_win32?=$(LUAPREFIX_win32)/include/lua/$(LUAV) $(LUAPREFIX_win32)/include/lua$(LUAV)
-PLATFORM_win32?=Release
-CDIR_win32?=bin/lua/$(LUAV)/$(PLATFORM_win32)
-LDIR_win32?=bin/lua/$(LUAV)/$(PLATFORM_win32)/lua
-LUALIB_win32?=$(LUAPREFIX_win32)/lib/lua/$(LUAV)/$(PLATFORM_win32)
-LUALIBNAME_win32?=lua$(subst .,,$(LUAV)).lib
+# LUAPREFIX_win32?=
+# LUAINC_win32?=$(LUAPREFIX_win32)/include/lua/$(LUAV) $(LUAPREFIX_win32)/include/lua$(LUAV)
+# PLATFORM_win32?=Release
+# CDIR_win32?=bin/lua/$(LUAV)/$(PLATFORM_win32)
+# LDIR_win32?=bin/lua/$(LUAV)/$(PLATFORM_win32)/lua
+# LUALIB_win32?=$(LUAPREFIX_win32)/lib/lua/$(LUAV)/$(PLATFORM_win32)
+# LUALIBNAME_win32?=lua$(subst .,,$(LUAV)).lib
 
 # LUAINC_win64:
 # LUALIB_win64:
