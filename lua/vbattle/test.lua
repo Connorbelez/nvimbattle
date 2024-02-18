@@ -1,0 +1,10 @@
+M = require("socket_client")
+-- S = require(init)
+-- local init = require("init")
+-- init.setup()
+-- init.run_socket_client()
+
+print("enter a msg")
+msg = io.read()
+-- init.send()
+M.send(msg)
