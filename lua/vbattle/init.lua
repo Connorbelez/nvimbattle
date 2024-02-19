@@ -25,7 +25,9 @@ local M = {}
 -- end
 
 -- local socket_client = require("vbattle.socket_client")
-
+function M.VT()
+  socket_client.VAPIT()
+end
 function M.run_socket_client()
 	-- start()
 	-- setup_luarocks()
