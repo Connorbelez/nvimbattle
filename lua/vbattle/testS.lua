@@ -30,9 +30,8 @@ function M.start()
 		return nil, connectionError
     else 
         print("connected")
-        tcp:send("S:10")
-        
-        -- recieve ok 
+        tcp:send("R:10")
+        -- recieve ok
         local response, err = tcp:receive()
         print("recieve: ",response," err: ",err)
 	end
@@ -45,36 +44,30 @@ function M.start()
 end
 
 -- Add a function to send messages
-function M.send(message)
-	if not M.tcp then
-		print("Socket is not connected.")
-		return
-	end
 
-	local success, err = M.tcp:send(message .. "\n") -- Ensure message ends with a newline or as required
-	if not success then
-		print("Failed to send message:", err)
-	else
-		print("Message sent:", message)
-	end
-end
 
 
 M.start()
 
 
+
 -- Start a separate coroutine for receiving messages from the server
 
-
--- Main loop for sending messages
-
 while true do
-    while M.tcp do
-    local msg = io.read()
-    if msg then
-        M.tcp:send(msg .. "\n")
+    print("Waiting on recieve")
+    local response, err = M.tcp:receive()
+    print("recieve: ",response," err: ",err)
+    if err then
+        if err ~= "timeout" then
+            print("Error:", err)
+            return
+        end
+    else
+        print(response)
     end
-end
 
     -- socket.sleep(0.01) -- Avoid busy looping
+
 end
+
+-- Main loop for sending messages

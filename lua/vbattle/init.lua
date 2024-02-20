@@ -18,6 +18,7 @@
 -- setup_luarocks()
 
 local socket_client = require("vbattle.socket_client")
+local socket_listen = require("vbattle.socket_client_send")
 
 local M = {}
 -- function M.setup_deps()
@@ -25,11 +26,20 @@ local M = {}
 -- end
 
 -- local socket_client = require("vbattle.socket_client")
+function M.VT()
+	socket_client.VAPIT()
+end
 
-function M.run_socket_client()
+function M.run_socket_client(id)
 	-- start()
 	-- setup_luarocks()
-	socket_client.start()
+	socket_client.start(id)
+end
+
+function M.listen(id)
+	-- start()
+	-- setup_luarocks()
+	socket_listen.startListen(id)
 end
 
 function M.send()

@@ -30,7 +30,7 @@ function M.start()
 		return nil, connectionError
     else 
         print("connected")
-        tcp:send("S:10")
+        tcp:send("S:20")
         
         -- recieve ok 
         local response, err = tcp:receive()
