@@ -34,6 +34,8 @@ function M.run_socket_client(id)
 	-- start()
 	-- setup_luarocks()
 	socket_client.start(id)
+
+	socket_listen.startListen(id)
 end
 
 function M.listen(id)

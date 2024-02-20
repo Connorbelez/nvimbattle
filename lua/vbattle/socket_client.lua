@@ -17,10 +17,11 @@ function M.HandleVimMotion()
 	if M.tcp then
 		local cVal = vim.api.nvim_win_get_cursor(0)
 
-		local cstring = ""
+		local cstring = "c"
 		for k, v in ipairs(cVal) do
-			cstring = cstring .. " " .. k .. ":" .. v
+			cstring = cstring .. ":" .. v
 		end
+
 		M.send(cstring)
 	end
 end
@@ -64,18 +65,18 @@ function M.VAPIT()
 				["char"] = tTable[#tTable],
 			})
 
-			estring = ""
-			local lins = vim.api.nvim_buf_get_lines(0, lastline, tTable[#tTable - 1], false)
-			for k, v in ipairs(lins) do
-				estring = estring .. " " .. k .. ":" .. v
-			end
+			-- estring = ""
+			-- local lins = vim.api.nvim_buf_get_lines(0, lastline, tTable[#tTable - 1], false)
+			-- for k, v in ipairs(lins) do
+			-- 	estring = estring .. " " .. k .. ":" .. v
+			-- end
 
 			-- print(lastline, estring)
-			local cursorPos = vim.api.nvim_win_get_cursor(0)
-			local cursorString = ""
-			for k, v in ipairs(cursorPos) do
-				cursorString = cursorString .. k .. "," .. v
-			end
+			-- local cursorPos = vim.api.nvim_win_get_cursor(0)
+			-- local cursorString = ""
+			-- for k, v in ipairs(cursorPos) do
+			-- 	cursorString = cursorString .. k .. "," .. v
+			-- end
 
 			local AllLines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
 			local outS = ""
@@ -120,6 +121,8 @@ function M.start(id)
 	end
 
 	print("STARTING")
+	M.VAPIT()
+
 	-- Create a TCP socket and connect to the server
 	local tcp = assert(socket.tcp())
 	local connected, connectionError = tcp:connect(host, port)

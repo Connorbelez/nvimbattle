@@ -1,6 +1,7 @@
 local vim = vim
 local uv = vim.loop -- Access Neovim's event loop
 
+local M = {}
 local logBuffer = nil
 local logBufferName = "LogBuffer"
 
@@ -27,12 +28,30 @@ local function writeToLogBuffer2(msg)
 		local lines = vim.split(msg, "\n") -- Split the replacement text into lines
 
 		-- Set lines in the buffer
-		vim.api.nvim_buf_set_lines(logBuffer, 0, -1, false, lines)
+		if lines[1] and (string.match(tostring(lines[1]), "^c:(%d+):(%d+)$")) then
+			local row, col = string.match(tostring(lines[1]), "(%d+):(%d+)")
+			row = tonumber(row)
+			col = tonumber(col)
+			if row > 0 then
+				row = row - 1
+			end
+			if col > 0 then
+				col = col - 1
+			end
+			if M.mid then
+				vim.api.nvim_buf_del_extmark(0, M.mark_ns, M.mid)
+			end
+			if M.mark_ns then
+				M.mid = vim.api.nvim_buf_set_extmark(logBuffer, M.mark_ns, row, col, {
+					virt_text = { { ">" } },
 
-		-- Ensure the window with the log buffer scrolls to the bottom
-		local winId = vim.fn.bufwinid(logBuffer)
-		if winId ~= -1 then
-			vim.api.nvim_win_set_cursor(winId, { vim.api.nvim_buf_line_count(logBuffer), 0 })
+					-- hl_mode = "combine",
+					virt_text_pos = "overlay",
+					-- ephemeral = true,
+				})
+			end
+		else
+			vim.api.nvim_buf_set_lines(logBuffer, 0, -1, false, lines)
 		end
 	end)
 end
@@ -47,8 +66,6 @@ local function createBuffer()
 	end
 end
 
-local M = {}
-
 M.tcp_handle = nil -- Store the handle of the TCP connection
 
 function M.startListen(id)
@@ -56,8 +73,19 @@ function M.startListen(id)
 		print("Connection already exists.")
 		return
 	end
+	local nsid = "id" .. id
 	createBuffer()
+	M.mark_ns = vim.api.nvim_create_namespace(tostring(nsid))
 	-- Create a new TCP handle
+	-- M.mark_ns = vim.api.nvim_create_namespace(id)
+	-- local mid = vim.api.nvim_buf_set_extmark(logBuffer, M.mark_ns, 1, 1, {
+	-- 	virt_text = { { ">" } },
+	--
+	-- 	hl_mode = "combine",
+	-- 	virt_text_pos = "inline",
+	-- 	-- ephemeral = true,
+	-- })
+	-- vim.api.nvim_buf_del_extmark(0, M.mark_ns, mid)
 	M.tcp_handle = uv.new_tcp()
 
 	-- Connect to the server
