@@ -27,12 +27,12 @@ end
 
 function M.VAPIT()
 	-- print(vim.fn.printf("Hello from %s", "Lua"))
-	local reversed_list = vim.fn.reverse({ "a", "b", "c" })
-	-- vim.print(reversed_list) -- { "c", "b", "a" }
-	local function print_stdout(chan_id, data, name)
-		print(data[1])
-	end
-	vim.fn.jobstart("ls", { on_stdout = print_stdout })
+	-- local reversed_list = vim.fn.reverse({ "a", "b", "c" })
+	-- -- vim.print(reversed_list) -- { "c", "b", "a" }
+	-- local function print_stdout(chan_id, data, name)
+	-- 	print(data[1])
+	-- end
+	-- vim.fn.jobstart("ls", { on_stdout = print_stdout })
 	-- print(vim.fn.printf("Hello from %s", "Lua"))
 
 	local LastChange = {}
@@ -43,7 +43,7 @@ function M.VAPIT()
 		pattern = "*",
 		callback = M.HandleVimMotion,
 	})
-	local lines = vim.api.nvim_buf_get_lines(0, 0, 2, false)
+	-- local lines = vim.api.nvim_buf_get_lines(0, 0, 2, false)
 	events = {}
 	vim.api.nvim_buf_attach(0, false, {
 		on_lines = function(...)
@@ -77,12 +77,18 @@ function M.VAPIT()
 				cursorString = cursorString .. k .. "," .. v
 			end
 
+			local AllLines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+			local outS = ""
+
+			for k, v in ipairs(AllLines) do
+				outS = outS .. v .. "\n"
+			end
 			if M.tcp then
-				M.send(estring)
+				M.send(outS)
 				-- print("Send to server: ", estring)
-				M.send(cursorString)
-			-- print("Sendtoserver c" .. cursorString)
-			else
+				-- M.send(cursorString)
+				-- print("Sendtoserver c" .. cursorString)
+				-- else
 				-- print("no connection to server")
 			end
 
