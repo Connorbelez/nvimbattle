@@ -9,4 +9,7 @@ command! -nargs=? RunSocketClient lua require("vbattle").run_socket_client(<f-ar
 command! -nargs=? SendSocketM lua require("vbattle").send(<f-args>)
 command! -nargs=? Listen lua require("vbattle").listen(<f-args>)
 command! RunSocketVAPI lua require("vbattle").VT()
+command! VsockConn lua require("vbattle").VSOCK()
+command! VsockR lua require("vbattle").VREAD()
+
 " command! -nargs=0 FetchTodos lua require("vb").fetch_todos()

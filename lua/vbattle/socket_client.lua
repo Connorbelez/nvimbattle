@@ -4,27 +4,67 @@
 -- vim.opt.runtimepath:prepend(socketCorePath)
 -- package.cpath = socketCorePath .. "/?.so;" .. package.cpath
 local socket = require("vbattle.deps.sock.socket")
+local uv = vim.loop
 -- Server details
 local host = "192.168.3.2"
 local port = 80 -- Adjusted to match the Go server port
 local serverAddress = host .. ":" .. port
-
+-- local mpack = require("rpc")
 local M = {}
-
+M.seq = 0
 -- Persistant TCP socket connection
 M.tcp = nil
+M.Ready = false
+local function encodeRequest(action, seq, lines, col, row)
+	local lineTable = {}
+
+	-- for index, value in ipairs(lines) do
+	-- 	lineTable[tostring(index)] = value
+	-- end
+	local lineJoin = table.concat(lines, "\n")
+	local data = {
+		["Type"] = "request",
+		["Action"] = action,
+		-- ["Payload"] = "TEST PAYLOAD",
+		Payload = {
+			["Seq"] = seq,
+			["Lines"] = lineJoin,
+			["CursorCol"] = col,
+			["CursorRow"] = row,
+			["LineFrom"] = 0,
+			["LineTo"] = -1,
+		},
+	}
+	return vim.mpack.encode(data)
+end
 function M.HandleVimMotion()
 	if M.tcp then
 		local cVal = vim.api.nvim_win_get_cursor(0)
 
-		local cstring = "c"
-		for k, v in ipairs(cVal) do
-			cstring = cstring .. ":" .. v
-		end
-
-		M.send(cstring)
+		-- local data = {
+		-- 	reqType = "request",
+		-- 	action = "update",
+		--
+		-- 	payload = {
+		-- 		seq = M.seq,
+		-- 		lines = AllLines,
+		-- 		cursorCol = cVal.col,
+		-- 		cursorRow = cVal.row,
+		-- 	},
+		-- }
+		-- local cstring = "c"
+		-- for k, v in ipairs(cVal) do
+		-- 	cstring = cstring .. ":" .. v
+		-- end
+		-- local packedData = vim.mpack.encode(data)
+		local tmp = { "Vim\nMotion" }
+		local encodedData = encodeRequest("CR", M.seq, tmp, tonumber(cVal[2]), tonumber(cVal[1]))
+		M.send(encodedData)
 	end
 end
+
+M.WriteBuf = nil
+M.WriteBufName = "GameWindow"
 
 function M.VAPIT()
 	-- print(vim.fn.printf("Hello from %s", "Lua"))
@@ -44,9 +84,20 @@ function M.VAPIT()
 		pattern = "*",
 		callback = M.HandleVimMotion,
 	})
+
 	-- local lines = vim.api.nvim_buf_get_lines(0, 0, 2, false)
 	events = {}
-	vim.api.nvim_buf_attach(0, false, {
+	-- writebuffer = vim.api.nvim_create_buf(false, true) -- no file backing, listed
+	--
+	-- vim.api.nvim_buf_set_name(writebuffer, writebuffername)
+	--
+	-- local winid = vim.fn.bufwinid(writebuffer)
+	-- if winid == -1 then -- buffer is not displayed in any window
+	-- 	-- vim.api.nvim_command("vsplit")
+	-- 	vim.api.nvim_win_set_buf(0, writebuffer)
+	-- end
+	local winId = vim.fn.bufwinid(M.WriteBuf)
+	vim.api.nvim_buf_attach(M.WriteBuf, false, {
 		on_lines = function(...)
 			table.insert(events, { ... })
 			-- for k,v in pairs(events) do
@@ -59,12 +110,12 @@ function M.VAPIT()
 			if #LastChange > 1 then
 				lastline = LastChange[#LastChange]["line"]
 			end
-
-			table.insert(events, {
-				["line"] = tTable[#tTable - 1],
-				["char"] = tTable[#tTable],
-			})
-
+			--
+			-- table.insert(events, {
+			-- 	["line"] = tTable[#tTable - 1],
+			-- 	["char"] = tTable[#tTable],
+			-- })
+			--
 			-- estring = ""
 			-- local lins = vim.api.nvim_buf_get_lines(0, lastline, tTable[#tTable - 1], false)
 			-- for k, v in ipairs(lins) do
@@ -72,25 +123,48 @@ function M.VAPIT()
 			-- end
 
 			-- print(lastline, estring)
-			-- local cursorPos = vim.api.nvim_win_get_cursor(0)
+			local cursorPos = vim.api.nvim_win_get_cursor(0)
 			-- local cursorString = ""
 			-- for k, v in ipairs(cursorPos) do
 			-- 	cursorString = cursorString .. k .. "," .. v
 			-- end
 
 			local AllLines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
-			local outS = ""
+			-- local outS = ""
 
-			for k, v in ipairs(AllLines) do
-				outS = outS .. v .. "\n"
-			end
+			-- type NvimReq struct {
+			--     reqType string
+			--     action string
+			--     payload = struct {
+			--         seq = int
+			--         lines = map[int]string
+			--         cursorCol = int
+			--         cursorRow = int
+			--     }
+			-- }
+			-- local data = {
+			-- 	reqType = "request",
+			-- 	action = "update",
+			--
+			-- 	payload = {
+			-- 		seq = M.seq,
+			-- 		lines = AllLines,
+			-- 		cursorCol = cursorPos.col,
+			-- 		cursorRow = cursorPos.row,
+			-- 	},
+			-- }
+			local encodedData = encodeRequest("update", M.seq, AllLines, tonumber(cursorPos[2]), tonumber(cursorPos[1]))
+
+			-- for k, v in ipairs(AllLines) do
+			-- 	outS = outS .. v .. "\n"
+			-- end
 			if M.tcp then
-				M.send(outS)
-				-- print("Send to server: ", estring)
-				-- M.send(cursorString)
-				-- print("Sendtoserver c" .. cursorString)
-				-- else
-				-- print("no connection to server")
+				-- M.tcp:write(encodedData)
+				print("Send to server: ", encodedData)
+				M.send(encodedData)
+				print("Sendtoserver c" .. encodedData)
+			else
+				print("no connection to server")
 			end
 
 			-- for _,v in ipairs(tTable) do
@@ -121,23 +195,37 @@ function M.start(id)
 	end
 
 	print("STARTING")
-	M.VAPIT()
 
 	-- Create a TCP socket and connect to the server
-	local tcp = assert(socket.tcp())
-	local connected, connectionError = tcp:connect(host, port)
-	if not connected then
-		print("Error connecting to server:", connectionError)
-		return nil, connectionError
-	end
+	-- local tcp = assert(socket.tcp())
+	local tcp = uv.new_tcp()
+	tcp:connect(host, port)
+	-- uv.tcp_keepalive(tcp, true)
+	-- local connected, connectionError = tcp:connect(host, port)
+	-- if not connected then
+	-- 	print("Error connecting to server:", connectionError)
+	-- 	return nil, connectionError
+	-- end
 	local send = "S:" .. id
-	tcp:send(send)
-	local response, err = tcp:receive()
-	print("recieve: ", response, " err: ", err)
-	print("Connected to server at " .. serverAddress)
+	tcp:write(send)
+	tcp:read_start(function(err, chunk)
+		if chunk then
+			print("CHUNK: ", chunk, "\n")
+		end
+	end)
 
+	M.WriteBuf = vim.api.nvim_create_buf(false, true) -- No file backing, listed
+	vim.api.nvim_buf_set_name(M.WriteBuf, M.WriteBufName)
+
+	local winId = vim.fn.bufwinid(M.WriteBuf)
+	if winId == -1 then -- Buffer is not displayed in any window
+		-- vim.api.nvim_cmd(vim.api.nvim_parse_cmd("vsplit"))
+		-- vim.api.nvim_command("split")
+		vim.api.nvim_win_set_buf(0, M.WriteBuf)
+	end
 	-- Set the socket as persistant
 	M.tcp = tcp
+	-- M.VAPIT()
 	return tcp
 end
 
@@ -148,12 +236,12 @@ function M.send(message)
 		return
 	end
 
-	local success, err = M.tcp:send(message .. "\n") -- Ensure message ends with a newline or as required
-	-- if not success then
-	-- 	print("Failed to send message:", err)
-	-- else
-	-- 	-- print("Message sent:", message)
-	-- end
+	local success, err = M.tcp:write(message) -- Ensure message ends with a newline or as required
+	if not success then
+		print("Failed to send message:", err)
+	else
+		-- print("Message sent:", message)
+	end
 end
 
 return M

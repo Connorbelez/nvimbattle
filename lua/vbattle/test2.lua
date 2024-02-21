@@ -28,13 +28,13 @@ function M.start()
 	if not connected then
 		print("Error connecting to server:", connectionError)
 		return nil, connectionError
-    else 
-        print("connected")
-        tcp:send("S:20")
-        
-        -- recieve ok 
-        local response, err = tcp:receive()
-        print("recieve: ",response," err: ",err)
+	else
+		print("connected")
+		tcp:send("S:20")
+
+		-- recieve ok
+		local response, err = tcp:receive()
+		print("recieve: ", response, " err: ", err)
 	end
 
 	print("Connected to server at " .. serverAddress)
@@ -59,22 +59,19 @@ function M.send(message)
 	end
 end
 
-
 M.start()
 
-
 -- Start a separate coroutine for receiving messages from the server
-
 
 -- Main loop for sending messages
 
 while true do
-    while M.tcp do
-    local msg = io.read()
-    if msg then
-        M.tcp:send(msg .. "\n")
-    end
-end
+	while M.tcp do
+		local msg = io.read()
+		if msg then
+			M.tcp:send(msg .. "\n")
+		end
+	end
 
-    -- socket.sleep(0.01) -- Avoid busy looping
+	-- socket.sleep(0.01) -- Avoid busy looping
 end
